@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  # Load Balancer Service
+  load_balancer:
+    platform: linux/amd64
+    build: ./lb
+    container_name: load_balancer
+    ports:
+      - "5005:8000"
+    stop_grace_period: 10s
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - INITIAL_SERVERS=3
+    networks:
+      net1:
+        aliases:
+          - load_balancer
+
+  # Backend server template, just used to build image
+  fastapi_server_template:
+    build: ./app
+    image: fastapi-server:latest
+    entrypoint: ["echo", "fastapi-server:latest image built"]
+    networks:
+      - net1
+
+networks:
+  net1:
+    external: true
+
